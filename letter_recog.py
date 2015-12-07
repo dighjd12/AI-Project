@@ -116,7 +116,7 @@ class MLP(LetterStatModel):
         sample_n, var_n = samples.shape
         new_responses = self.unroll_responses(responses).reshape(-1, self.class_n)
 
-        layer_sizes = np.int32([var_n, 100, 100, self.class_n])
+        layer_sizes = np.int32([var_n, 1000, 500, self.class_n])
         self.model.create(layer_sizes)
 
         # CvANN_MLP_TrainParams::BACKPROP,0.001
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     args = dict(args)
 
 	#change this line to change the model!!
-    args.setdefault('--model', 'mlp')
+    args.setdefault('--model', 'svm')
     args.setdefault('--data', 'data/letter-recognition.data')
 
     print 'loading data %s ...' % args['--data']
@@ -167,12 +167,19 @@ if __name__ == '__main__':
     labels1 = labels[list]
 
     idx = 0
+    countCat = 0
+    countDog = 0
     for x in labels1:
 	if x==3:
 	    labels1[idx] = 0
+	    countCat=countCat+1
 	else:
 	    labels1[idx] = 1
+	    countDog=countDog+1
 	idx=idx+1
+
+    print countCat
+    print countDog
 
     #print labels1.shape
     #print labels1
