@@ -3,7 +3,6 @@ import cv2
 
 #todo: 1. reduce the size of input features - right now 32^2*3 long..
 # 2. make it such that after training, it can take photos and return the prediction result
-# 3. filter samples and responses so that only dog and cat dataset is analyzed
 # 4. play around with parameters ?
 # 5. also, right now only using one of the 5 dataset. should we change this?
 
@@ -21,7 +20,7 @@ def load_base(fn):
 
 class LetterStatModel(object):
     #number of possible outputs.
-    class_n = 10
+    class_n = 2
     #train ratio of the dataset
     train_ratio = 0.5
 
@@ -42,7 +41,9 @@ class LetterStatModel(object):
         sample_n = len(responses)
         new_responses = np.zeros(sample_n*self.class_n, np.int32)
         resp_idx = np.int32( responses + np.arange(sample_n)*self.class_n )
-        new_responses[resp_idx] = 1
+        #print resp_idx
+        #print sample_n
+	new_responses[resp_idx] = 1
 	#print(new_responses)
         return new_responses
 
@@ -144,7 +145,7 @@ if __name__ == '__main__':
     args = dict(args)
 
 	#change this line to change the model!!
-    args.setdefault('--model', 'rtrees')
+    args.setdefault('--model', 'mlp')
     args.setdefault('--data', 'data/letter-recognition.data')
 
     print 'loading data %s ...' % args['--data']
@@ -154,9 +155,32 @@ if __name__ == '__main__':
     data = samples1['data'].astype(np.float32)
     labels = np.array(samples1['labels'], dtype=np.float32)
 
+    list = []
+    idx = 0
+    for x in labels:
+	# 3 is cat, 5 is dog
+	if x==3 or x==5:
+	    list = list + [idx]
+	idx=idx+1
+
+    data1 = data[list]
+    labels1 = labels[list]
+
+    idx = 0
+    for x in labels1:
+	if x==3:
+	    labels1[idx] = 0
+	else:
+	    labels1[idx] = 1
+	idx=idx+1
+
+    #print labels1.shape
+    #print labels1
+    #print data1.shape
+
     # samples = attributes, responses = the answer
-    samples = data
-    responses = labels
+    samples = data1
+    responses = labels1
 
     #samples, responses = load_base(args['--data'])
     Model = models[args['--model']]
@@ -164,6 +188,8 @@ if __name__ == '__main__':
 
 	# train_n: number of training samples
     train_n = int(len(samples)*model.train_ratio)
+    
+    #print train_n
     if '--load' in args:
         fn = args['--load']
         print 'loading model from %s ...' % fn
