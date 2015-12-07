@@ -5,6 +5,7 @@ import cv2
 # 2. make it such that after training, it can take photos and return the prediction result
 # 3. filter samples and responses so that only dog and cat dataset is analyzed
 # 4. play around with parameters ?
+# 5. also, right now only using one of the 5 dataset. should we change this?
 
 def unpickle(file):
     import cPickle
